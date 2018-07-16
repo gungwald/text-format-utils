@@ -1,0 +1,53 @@
+#!/bin/sh
+
+# Abbreviations:
+#	CR = Carriage Return	is ASCII code 13 in decimal
+#	LF = Line Feed			is ASCII code 10 in decimal
+#
+# Text file line terminators by operating system:
+#	Windows	uses CRLF
+#	UNIX	uses LF
+#	MacOS9	uses CR
+#
+# This script converts a text file in Windows format (CRLF line terminators)
+# to UNIX format (LF-only for line terminators). The algorithm it uses is to
+# remove all the carriage returns in the input file.
+#
+# The algorithm works in most cases:
+# 1. If the file is actually in Windows format and contains no stray
+#    carriage returns by themselves, which would be part of the data
+#    rather than part of a line terminator. In this case, only CRs that
+#    are part of the Windows line terminator sequence will be removed,
+#    which is the correct functionality.
+# 2. If the file is in UNIX format and contains no stray carriage returns
+#    by themselves, which would be part of the data. In this case, the file
+#	 will actually not be changed at all, since there are no carriage
+#    returns to remove. This would be a case of accidental usage because
+#    it is a operation that didn't need to be performed. This accidental
+#    usage has no negative affect because the file is not changed.
+#
+# There are a few rare cases when this algorithm will cause a problem:
+# 1. If the file is in Windows or UNIX format and there are stray
+#    carriage returns that are an important part of the data within a line
+#    itself (not part of
+#    a line terminator). Those stray carriage returns will get removed and
+#    the data will then be incorrect as it will have been modified.
+# 2. If the file is in the format used by Mac OS 9 or earlier (because this
+#    was a non-UNIX system) or the Apple II text format. Since these
+#    systems used a single carriage return as the line termination
+#    sequence, the file will be converted to a single line. This is because
+#    all the line terminators (CRs in this case) will be removed.
+
+TEMP_OUTPUT_FILE=$(mktemp)
+
+for INPUT_FILE in "$@"
+do
+	# Delete all carriage returns from the input.
+    if tr -d '\r' < "$INPUT_FILE" > "$TEMP_OUTPUT_FILE"
+    then
+    	# Move the temp file back to the original, overwriting the original.
+        mv "$TEMP_OUTPUT_FILE" "$INPUT_FILE"
+	fi
+done
+
+rm -f "$TEMP_OUTPUT_FILE"
