@@ -10,9 +10,16 @@
 # To find a CRLF or LF in a file, or to detect a CR that is not followed
 # by a LF, the file has to be read character by character.
 
+IDENTIFY_SELF=true
+
 message()
 {
-	echo $PROGRAM_NAME: $FILE: $*
+    if [ "$IDENTIFY_SELF" = 'true' ]
+    then
+		echo $PROGRAM_NAME: $FILE: $*
+    else
+    	echo $*
+    fi
 }
 
 error()
@@ -86,14 +93,21 @@ identifyTextFormat()
 
 PROGRAM_NAME=$(basename "$0")
 
-for FILE in "$@"
+for ARG in "$@"
 do
-	# Make sure it is some kind of text file and not binary data.
-	if file "$FILE" | grep -iq text
-	then
-		# Pipes file contents one character per line to identify function
-		hexdump -v -e '1/1 "%_u\n"' "$FILE" | identifyTextFormat
+    if [ "$ARG" = '-i' ]
+    then
+    	IDENTIFY_SELF=false
+    elif [ -e "$ARG" ]
+    then
+		if file "$ARG" | grep -iq text
+		then
+			# Pipes file contents one character per line to identify function
+			hexdump -v -e '1/1 "%_u\n"' "$ARG" | identifyTextFormat
+		else
+			message Not a text file
+		fi
 	else
-		message Not a text file
-	fi
+        message File not found
+    fi
 done
