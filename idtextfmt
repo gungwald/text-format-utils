@@ -16,7 +16,7 @@ message()
 {
     if [ "$IDENTIFY_SELF" = 'true' ]
     then
-		echo $PROGRAM_NAME: $FILE: $*
+		echo $PROGRAM_NAME: $ARG: $*
     else
     	echo $*
     fi

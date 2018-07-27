@@ -45,8 +45,8 @@ do
 	# Delete all carriage returns from the input.
     if tr -d '\r' < "$INPUT_FILE" > "$TEMP_OUTPUT_FILE"
     then
-    	# Move the temp file back to the original, overwriting the original.
-        mv "$TEMP_OUTPUT_FILE" "$INPUT_FILE"
+    	# Use cp to preserve file attributes.
+        cp "$TEMP_OUTPUT_FILE" "$INPUT_FILE"
 	fi
 done
 
